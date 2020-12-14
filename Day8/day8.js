@@ -1,13 +1,14 @@
-function day8(lineDict, visited) {
+function part1(lineDict, visited) {
     var currPos = 0;
     var accumulated = 0;
 
     while (!visited.includes(currPos)) {
         visited.push(currPos);
-        if (lineDict[currPos][0] === 'jmp') {
-            currPos += parseInt(lineDict[currPos][1]);
-        } else if (lineDict[currPos][0] === 'acc') {
-            var acc = parseInt(lineDict[currPos][1]);
+        var currContent = lineDict.get(currPos);
+        if (currContent[0] === 'jmp') {
+            currPos += parseInt(currContent[1]);
+        } else if (currContent[0] === 'acc') {
+            var acc = parseInt(currContent[1]);
             currPos += 1;
             accumulated += acc;
         } else {
@@ -18,8 +19,13 @@ function day8(lineDict, visited) {
     console.log("Accumulated: " + accumulated);
 }
 
+function day8(lineDict) {
+    var visited = [];
+    part1(lineDict, visited);
+}
+
 $(window).on("load", function () {
-    var lineDict = {}
+    const lineDict = new Map();
     $("#file").on("change", function () {
         const file = this.files[0];
         const reader = new FileReader();
@@ -31,12 +37,11 @@ $(window).on("load", function () {
             // Reading line by line
             allLines.forEach((line) => {
                 const content = line.split(' ');
-                lineDict[currLine] = content;
+                lineDict.set(currLine, content);
                 currLine += 1;
             });
 
-            var visited = [];
-            day8(lineDict, visited);
+            day8(lineDict);
         };
 
         reader.onerror = (event) => {
