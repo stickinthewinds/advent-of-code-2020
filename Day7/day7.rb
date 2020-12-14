@@ -11,28 +11,30 @@ class Day7
     end
   end
 
-  # { outer bag => {int => inner bag}}
+  # { outer bag => [{int => inner bag}, {int => inner bag}]}
   def read_file
     bags = {}
     line_num=0
     text=File.open(ARGV[0]).read
+
     text.each_line do |line|
       bag_type = line.split(' bags contain')
+      bags[bag_type[0]] = []
       if bag_type[1] != " no other bags.\n"
         bags = read_inner_bags(bags, bag_type, line)
         #puts "#{line_num += 1} #{inner_bags}\n"
       else
-        bags[bag_type[0]] = {"None" => 0}
+        bags[bag_type[0]].push(["None", 0])
       end
     end
 
-    gold_count = 0
     looked = {}
     #puts "#{bags.length}"
     bags.each do |k, v|
-      gold_count = count_gold_bags(looked, bags, k, 1)
+      check_gold_bags(looked, bags, k)
     end
-    puts "#{gold_count}"
+
+    puts "#{looked.values.count(true)}"
   end
 
   def read_inner_bags(bags, outer_bag, line)
@@ -41,36 +43,49 @@ class Day7
       num_bags = bag[/\d+/].to_i
       bag_colour = bag[/[a-zA-Z]+ [a-zA-Z]+/]
       #puts "#{outer_bag[0]} #{num_bags} #{bag_colour}\n"
+      bags[outer_bag[0]].push([bag_colour, num_bags])
     end
-    bags[outer_bag[0]] = {bag_colour => num_bags}
+    #bags[outer_bag[0]] = {bag_colour => num_bags}
     return bags
   end
 
-  def count_gold_bags(looked, bags, key, depth)
+  def check_gold_bags(looked, bags, key)
     # If it has been checked don't bother checking again
     if looked.include? key
-      # If it is above one return the depth to the key
-      # Otherwise return the key as is
-      value = looked[key]
-      return value > 1 ? value + depth : value
+      return looked[key]
     end
 
-    # Since it does not exist initialise it at 0
-    looked[key] = 0
+    # Since it does not exist initialise it as false
+    looked[key] = false
 
     # For each inner bag check if it is shiny gold.
     # If not and it is not an empty bag then repeat
-    bags[key].each do |k, v|
-      puts "#{key}, #{k}, #{v}"
-      # If the bag contains a golden bag return the current depth
-      if k == "shiny gold" and v > 0
-        puts "Found one"
-        looked[key] += depth - 1
-      elsif k != "None"
-        looked[key] = count_gold_bags(looked, bags, k, depth + 1)
+    puts "#{key}: #{bags[key]}"
+    inner_bags = bags[key]
+    for bag in inner_bags
+      # If the bag contains a golden bag set the current bag to true
+      if bag[0] == "shiny gold" and bag[1] > 0
+        looked[bag[0]] = false # Shiny gold bag doesn't count
+        looked[key] = true
+      elsif bag[0] != "None"
+        lookDown = check_gold_bags(looked, bags, bag[0])
+        looked[key] = looked[key] ?
+                true :
+                lookDown
       end
     end
-    return looked.values.inject { |a, b| a + b }
+
+    return looked[key]
+  end
+
+  def part2(bags)
+    looked = {}
+    for bag in bags["shiny gold"]
+      #puts "#{bag}"
+      looked[bag[0]] = bag[1]
+      part2_recurse(bag[0], bag[1], looked)
+    end
+    puts "#{looked}"
   end
 
   day7 = Day7.new
