@@ -73,13 +73,13 @@ contains
    end function map_seats
 
    ! go through each seat checking if it needs to be changed then change them as needed
-   function process_seats(seats, rows, columns) result(updated)
+   function process_seats(seats, rows, columns, part) result(updated)
       implicit none
 
       ! import the array of seats but also make it editable for return
       character(len=100), allocatable, intent(inout) :: seats(:)
-      ! import the number of rows and columns in the seats
-      integer, intent(in) :: rows, columns
+      ! import the number of rows and columns in the seats and the part
+      integer, intent(in) :: rows, columns, part
       integer :: i, j
       character :: current
 
@@ -100,7 +100,7 @@ contains
          do j = 1, columns
             current = seats(i) (j:j)
             if (current /= '.') then ! ignore the '.' spots which are the floor
-               call update_seat(changing, current, seats, i, j, rows, columns)
+               call update_seat(changing, current, seats, i, j, rows, columns, part)
             end if
          end do
          ! print*, seats(i)
@@ -126,13 +126,13 @@ contains
 
    end function process_seats
 
-   subroutine update_seat(changing, current, seats, i, j, rowMax, colMax)
+   subroutine update_seat(changing, current, seats, i, j, rowMax, colMax, part)
       implicit none
 
       ! imports
       character, intent(in) :: current
       character(len=100), allocatable, intent(in) :: seats(:)
-      integer, intent(in) :: i, j, rowMax, colMax
+      integer, intent(in) :: i, j, rowMax, colMax, part
 
       integer :: k, l, iMov, jMov
 
@@ -159,11 +159,16 @@ contains
          jMov = j
       end if
 
-      call check_surroundings(changing, current, seats, k, l, iMov, jMov)
+      if ( part == 1 ) then
+       call check_surroundings_part1(changing, current, seats, k, l, iMov, jMov)
+      else if ( part == 2 ) then
+       call check_surroundings_part2(changing, current, seats, i, j, rowMax, colMax)
+      end if
 
    end subroutine update_seat
 
-   subroutine check_surroundings(changing, current, seats, i, j, iMov, jMov)
+   ! check the 8 surrounding seats for part 1
+   subroutine check_surroundings_part1(changing, current, seats, i, j, iMov, jMov)
       implicit none
       character, intent(in) :: current
       character(len=100), allocatable, intent(in) :: seats(:)
@@ -195,11 +200,149 @@ contains
          if (occupied == 0) then
             changing(posI, posJ) = 1
          end if
-      else if (occupied > 4) then ! greater than because it also checked itself
+      else if (current == '#' .AND. occupied > 4) then ! greater than because it also checked itself
          changing(posI, posJ) = 1
       else
          changing(posI, posJ) = 0
       end if
 
    end subroutine
+
+   ! check every visible seat adjacent to the current one for part 2
+   subroutine check_surroundings_part2(changing, current, seats, i, j, rowMax, colMax)
+       implicit none
+
+       ! imports
+       character, intent(in) :: current
+       character(len=100), allocatable, intent(in) :: seats(:)
+       integer, intent(in) :: i, j, rowMax, colMax
+
+       ! import changing as a return to be edited
+       integer, dimension(:, :), intent(inout) :: changing
+       integer :: k, l, occupied
+       logical :: ignore
+       character(len=100) :: seat
+ 
+       occupied = 0
+
+       ! shitty brute force with a heap of loops
+       k = i - 1
+       l = j - 1
+       ignore = .FALSE.
+       do while ( .NOT. ignore .AND. k > 0 .AND. l > 0)
+              seat = seats(k)(l:l)
+              ignore = check_seat(seat)
+              if ( ignore .AND. seat == '#' ) then
+              occupied = occupied + 1
+              end if
+              k = k - 1
+              l = l - 1
+       end do
+
+       k = i + 1
+       l = j + 1
+       ignore = .FALSE.
+       do while ( .NOT. ignore .AND. k <= rowMax .AND. l <= colMax)
+              seat = seats(k)(l:l)
+              ignore = check_seat(seat)
+              if ( ignore .AND. seat == '#' ) then
+              occupied = occupied + 1
+              end if
+              k = k + 1
+              l = l + 1
+       end do
+
+       k = i - 1
+       l = j + 1
+       ignore = .FALSE.
+       do while ( .NOT. ignore .AND. k > 0 .AND. l <= colMax)
+              seat = seats(k)(l:l)
+              ignore = check_seat(seat)
+              if ( ignore .AND. seat == '#' ) then
+              occupied = occupied + 1
+              end if
+              k = k - 1
+              l = l + 1
+       end do
+
+       k = i + 1
+       l = j - 1
+       ignore = .FALSE.
+       do while ( .NOT. ignore .AND. k <= rowMax .AND. l > 0)
+              seat = seats(k)(l:l)
+              ignore = check_seat(seat)
+              if ( ignore .AND. seat == '#' ) then
+              occupied = occupied + 1
+              end if
+              k = k + 1
+              l = l - 1
+       end do
+
+       k = i - 1
+       ignore = .FALSE.
+       do while ( .NOT. ignore .AND. k > 0)
+              seat = seats(k)(j:j)
+              ignore = check_seat(seat)
+              if ( ignore .AND. seat == '#' ) then
+              occupied = occupied + 1
+              end if
+              k = k - 1
+       end do
+
+       k = i + 1
+       ignore = .FALSE.
+       do while ( .NOT. ignore .AND. k <= rowMax)
+              seat = seats(k)(j:j)
+              ignore = check_seat(seat)
+              if ( ignore .AND. seat == '#' ) then
+              occupied = occupied + 1
+              end if
+              k = k + 1
+       end do
+
+       l = j - 1
+       ignore = .FALSE.
+       do while ( .NOT. ignore .AND. l > 0)
+              seat = seats(i)(l:l)
+              ignore = check_seat(seat)
+              if ( ignore .AND. seat == '#' ) then
+              occupied = occupied + 1
+              end if
+              l = l - 1
+       end do
+
+       l = j + 1
+       ignore = .FALSE.
+       do while ( .NOT. ignore .AND. l <= colMax)
+              seat = seats(i)(l:l)
+              ignore = check_seat(seat)
+              if ( ignore .AND. seat == '#' ) then
+              occupied = occupied + 1
+              end if
+              l = l + 1
+       end do
+ 
+       if (current == 'L') then
+          if (occupied == 0) then
+             changing(i, j) = 1
+          end if
+       else if (current == '#' .AND. occupied > 4) then
+          changing(i, j) = 1
+       else
+          changing(i, j) = 0
+       end if
+ 
+    end subroutine
+
+    function check_seat(seat) result(notFloor)
+           implicit none
+           character(len=100), intent(in) :: seat
+           logical :: notFloor
+
+           notFloor = .FALSE.
+
+           if (seat .NE. '.') then
+              notFloor = .TRUE.
+           end if
+    end function check_seat
 end module file_reader
