@@ -613,6 +613,9 @@ hs_err_pid*
 *.mod
 *.smod
 
+# Fortran anc files
+*.anc
+
 # Compiled Static libraries
 *.lai
 *.la
