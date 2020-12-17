@@ -159,10 +159,10 @@ contains
          jMov = j
       end if
 
-      if ( part == 1 ) then
-       call check_surroundings_part1(changing, current, seats, k, l, iMov, jMov)
-      else if ( part == 2 ) then
-       call check_surroundings_part2(changing, current, seats, i, j, rowMax, colMax)
+      if (part == 1) then
+         call check_surroundings_part1(changing, current, seats, k, l, iMov, jMov)
+      else if (part == 2) then
+         call check_surroundings_part2(changing, current, seats, i, j, rowMax, colMax)
       end if
 
    end subroutine update_seat
@@ -210,139 +210,139 @@ contains
 
    ! check every visible seat adjacent to the current one for part 2
    subroutine check_surroundings_part2(changing, current, seats, i, j, rowMax, colMax)
-       implicit none
+      implicit none
 
-       ! imports
-       character, intent(in) :: current
-       character(len=100), allocatable, intent(in) :: seats(:)
-       integer, intent(in) :: i, j, rowMax, colMax
+      ! imports
+      character, intent(in) :: current
+      character(len=100), allocatable, intent(in) :: seats(:)
+      integer, intent(in) :: i, j, rowMax, colMax
 
-       ! import changing as a return to be edited
-       integer, dimension(:, :), intent(inout) :: changing
-       integer :: k, l, occupied
-       logical :: ignore
-       character(len=100) :: seat
- 
-       occupied = 0
+      ! import changing as a return to be edited
+      integer, dimension(:, :), intent(inout) :: changing
+      integer :: k, l, occupied
+      logical :: ignore
+      character(len=100) :: seat
 
-       ! shitty brute force with a heap of loops
-       k = i - 1
-       l = j - 1
-       ignore = .FALSE.
-       do while ( .NOT. ignore .AND. k > 0 .AND. l > 0)
-              seat = seats(k)(l:l)
-              ignore = check_seat(seat)
-              if ( ignore .AND. seat == '#' ) then
-              occupied = occupied + 1
-              end if
-              k = k - 1
-              l = l - 1
-       end do
+      occupied = 0
 
-       k = i + 1
-       l = j + 1
-       ignore = .FALSE.
-       do while ( .NOT. ignore .AND. k <= rowMax .AND. l <= colMax)
-              seat = seats(k)(l:l)
-              ignore = check_seat(seat)
-              if ( ignore .AND. seat == '#' ) then
-              occupied = occupied + 1
-              end if
-              k = k + 1
-              l = l + 1
-       end do
+      ! shitty brute force with a heap of loops
+      k = i - 1
+      l = j - 1
+      ignore = .FALSE.
+      do while (.NOT. ignore .AND. k > 0 .AND. l > 0)
+         seat = seats(k) (l:l)
+         ignore = check_seat(seat)
+         if (ignore .AND. seat == '#') then
+            occupied = occupied + 1
+         end if
+         k = k - 1
+         l = l - 1
+      end do
 
-       k = i - 1
-       l = j + 1
-       ignore = .FALSE.
-       do while ( .NOT. ignore .AND. k > 0 .AND. l <= colMax)
-              seat = seats(k)(l:l)
-              ignore = check_seat(seat)
-              if ( ignore .AND. seat == '#' ) then
-              occupied = occupied + 1
-              end if
-              k = k - 1
-              l = l + 1
-       end do
+      k = i + 1
+      l = j + 1
+      ignore = .FALSE.
+      do while (.NOT. ignore .AND. k <= rowMax .AND. l <= colMax)
+         seat = seats(k) (l:l)
+         ignore = check_seat(seat)
+         if (ignore .AND. seat == '#') then
+            occupied = occupied + 1
+         end if
+         k = k + 1
+         l = l + 1
+      end do
 
-       k = i + 1
-       l = j - 1
-       ignore = .FALSE.
-       do while ( .NOT. ignore .AND. k <= rowMax .AND. l > 0)
-              seat = seats(k)(l:l)
-              ignore = check_seat(seat)
-              if ( ignore .AND. seat == '#' ) then
-              occupied = occupied + 1
-              end if
-              k = k + 1
-              l = l - 1
-       end do
+      k = i - 1
+      l = j + 1
+      ignore = .FALSE.
+      do while (.NOT. ignore .AND. k > 0 .AND. l <= colMax)
+         seat = seats(k) (l:l)
+         ignore = check_seat(seat)
+         if (ignore .AND. seat == '#') then
+            occupied = occupied + 1
+         end if
+         k = k - 1
+         l = l + 1
+      end do
 
-       k = i - 1
-       ignore = .FALSE.
-       do while ( .NOT. ignore .AND. k > 0)
-              seat = seats(k)(j:j)
-              ignore = check_seat(seat)
-              if ( ignore .AND. seat == '#' ) then
-              occupied = occupied + 1
-              end if
-              k = k - 1
-       end do
+      k = i + 1
+      l = j - 1
+      ignore = .FALSE.
+      do while (.NOT. ignore .AND. k <= rowMax .AND. l > 0)
+         seat = seats(k) (l:l)
+         ignore = check_seat(seat)
+         if (ignore .AND. seat == '#') then
+            occupied = occupied + 1
+         end if
+         k = k + 1
+         l = l - 1
+      end do
 
-       k = i + 1
-       ignore = .FALSE.
-       do while ( .NOT. ignore .AND. k <= rowMax)
-              seat = seats(k)(j:j)
-              ignore = check_seat(seat)
-              if ( ignore .AND. seat == '#' ) then
-              occupied = occupied + 1
-              end if
-              k = k + 1
-       end do
+      k = i - 1
+      ignore = .FALSE.
+      do while (.NOT. ignore .AND. k > 0)
+         seat = seats(k) (j:j)
+         ignore = check_seat(seat)
+         if (ignore .AND. seat == '#') then
+            occupied = occupied + 1
+         end if
+         k = k - 1
+      end do
 
-       l = j - 1
-       ignore = .FALSE.
-       do while ( .NOT. ignore .AND. l > 0)
-              seat = seats(i)(l:l)
-              ignore = check_seat(seat)
-              if ( ignore .AND. seat == '#' ) then
-              occupied = occupied + 1
-              end if
-              l = l - 1
-       end do
+      k = i + 1
+      ignore = .FALSE.
+      do while (.NOT. ignore .AND. k <= rowMax)
+         seat = seats(k) (j:j)
+         ignore = check_seat(seat)
+         if (ignore .AND. seat == '#') then
+            occupied = occupied + 1
+         end if
+         k = k + 1
+      end do
 
-       l = j + 1
-       ignore = .FALSE.
-       do while ( .NOT. ignore .AND. l <= colMax)
-              seat = seats(i)(l:l)
-              ignore = check_seat(seat)
-              if ( ignore .AND. seat == '#' ) then
-              occupied = occupied + 1
-              end if
-              l = l + 1
-       end do
- 
-       if (current == 'L') then
-          if (occupied == 0) then
-             changing(i, j) = 1
-          end if
-       else if (current == '#' .AND. occupied > 4) then
-          changing(i, j) = 1
-       else
-          changing(i, j) = 0
-       end if
- 
-    end subroutine
+      l = j - 1
+      ignore = .FALSE.
+      do while (.NOT. ignore .AND. l > 0)
+         seat = seats(i) (l:l)
+         ignore = check_seat(seat)
+         if (ignore .AND. seat == '#') then
+            occupied = occupied + 1
+         end if
+         l = l - 1
+      end do
 
-    function check_seat(seat) result(notFloor)
-           implicit none
-           character(len=100), intent(in) :: seat
-           logical :: notFloor
+      l = j + 1
+      ignore = .FALSE.
+      do while (.NOT. ignore .AND. l <= colMax)
+         seat = seats(i) (l:l)
+         ignore = check_seat(seat)
+         if (ignore .AND. seat == '#') then
+            occupied = occupied + 1
+         end if
+         l = l + 1
+      end do
 
-           notFloor = .FALSE.
+      if (current == 'L') then
+         if (occupied == 0) then
+            changing(i, j) = 1
+         end if
+      else if (current == '#' .AND. occupied > 4) then
+         changing(i, j) = 1
+      else
+         changing(i, j) = 0
+      end if
 
-           if (seat .NE. '.') then
-              notFloor = .TRUE.
-           end if
-    end function check_seat
+   end subroutine
+
+   function check_seat(seat) result(notFloor)
+      implicit none
+      character(len=100), intent(in) :: seat
+      logical :: notFloor
+
+      notFloor = .FALSE.
+
+      if (seat .NE. '.') then
+         notFloor = .TRUE.
+      end if
+   end function check_seat
 end module file_reader
