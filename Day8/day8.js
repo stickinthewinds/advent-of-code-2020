@@ -44,22 +44,25 @@ function part2(lineDict) {
 
     for (let i = 0; i < lineDict.size; i++) {
         const value = lineDict.get(i);
-        // Switch the current value if it is nop or jmp
-        lineDict.set(i, [switch_value(value[0]), value[1]]);
-        console.log(lineDict.get(i));
+        if (value[0] !== 'acc') {
+            // Switch the current value if it is nop or jmp
+            lineDict.set(i, [switch_value(value[0]), value[1]]);
+            console.log(lineDict.get(i));
 
-        // Initialize visited so that it can be checked after the process
-        visited = [];
-        accumulated = process(lineDict, visited);
+            // Initialize visited so that it can be checked after the process
+            visited = [];
+            accumulated = process(lineDict, visited);
 
-        const lastVisited = visited.slice(-1).pop();
-        console.log(`Last visited for ${i}: ${lastVisited}`);
-        if (lastVisited >= lineDict.size - 1) {
-            return accumulated;
+            const lastVisited = visited.slice(-1).pop();
+            console.log(`Last visited for ${i}: ${lastVisited}`);
+            if (lastVisited >= lineDict.size - 1) {
+                return accumulated;
+            }
+
+            // Switch the value back before continuing
+            lineDict.set(i, value);
         }
-
-        // Switch the value back before continuing
-        lineDict.set(i, value);
+        
     }
     
     return accumulated;
