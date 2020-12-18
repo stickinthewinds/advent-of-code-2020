@@ -22,7 +22,6 @@ class Day7
       bags[bag_type[0]] = []
       if bag_type[1] != " no other bags.\n"
         bags = read_inner_bags(bags, bag_type, line)
-        #puts "#{line_num += 1} #{inner_bags}\n"
       else
         bags[bag_type[0]].push(["None", 0])
       end
@@ -35,6 +34,7 @@ class Day7
     end
 
     puts "#{looked.values.count(true)}"
+    part2(bags)
   end
 
   def read_inner_bags(bags, outer_bag, line)
@@ -80,12 +80,29 @@ class Day7
 
   def part2(bags)
     looked = {}
-    for bag in bags["shiny gold"]
-      #puts "#{bag}"
-      looked[bag[0]] = bag[1]
-      part2_recurse(bag[0], bag[1], looked)
+    total = part2_recurse("shiny gold", bags, looked)
+    puts "Total: #{total}"
+  end
+
+  # recursively count the bags inside of the given bag_type
+  def part2_recurse(bag_type, bags, looked)
+    if looked.include? bag_type
+      return looked[bag_type]
     end
-    puts "#{looked}"
+
+    if (bag_type == "None")
+      looked[bag_type] = 1
+      return 1
+    else
+      total = 0
+      for bag in bags[bag_type]
+        #puts "Adding #{bag[1]} bags of #{bag[0]} to #{bag_type}"
+        total += bag[1] + (bag[1] * part2_recurse(bag[0], bags, looked))
+      end
+      puts "Total for #{bag_type}: #{total}"
+      looked[bag_type] = total
+      return total
+    end
   end
 
   day7 = Day7.new
