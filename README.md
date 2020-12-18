@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# Advent of Code 2020
 
 This project was created as part of [Advent of Code 2020](https://adventofcode.com/2020).
 
