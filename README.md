@@ -25,3 +25,7 @@ Day 9- C
 Day 10 - Bash
 
 Day 11 - Modern Fortran
+
+Day 12 - PowerShell
+
+Day 13 - Smalltalk
